@@ -141,6 +141,7 @@ if (!IsCorrupted(packet)){
 if (TRACE > 0)
     printf ("----A: corrupted ACK is received, do nothing!\n");
 }
+
 /* called when A's timer goes off */
 void A_timerinterrupt(void){
 int i;
@@ -155,6 +156,7 @@ for(i=0; i<windowcount; i++) {
     starttimer(A,RTT);
 }
 }
+
 /* the following routine will be called once (only) before any other */
 /* entity A routines are called. You can use it to do any initialization */
 void A_init(void){
@@ -170,21 +172,30 @@ windowcount = 0;
 /********* Receiver (B) variables and procedures ************/
 static int expectedseqnum; /* the sequence number expected next by the receiver */
 static int B_nextseqnum; /* the sequence number for the next packets sent by B */
+static struct pkt out_of_order_buffer[WINDOWSIZE];
+static bool packet_received[WINDOWSIZE];
 /* called from layer 3, when a packet arrives for layer 4 at B*/
 void B_input(struct pkt packet){
 struct pkt sendpkt;
 int i;
 /* if not corrupted and received packet is in order */
-if ( (!IsCorrupted(packet)) && (packet.seqnum == expectedseqnum) ){
-    if (TRACE > 0)
-        printf("----B: packet %d is correctly received, send ACK!\n",packet.seqnum);
-    packets_received++;
-    /* deliver to receiving application */
-    tolayer5(B, packet.payload);
-    /* send an ACK for the received packet */
-    sendpkt.acknum = expectedseqnum;
-    /* update state variables */
-    expectedseqnum = (expectedseqnum + 1) % SEQSPACE;
+if (!IsCorrupted(packet)){
+    if(packet.seqnum == expectedseqnum){
+        if (TRACE > 0)
+            printf("----B: packet %d is correctly received, send ACK!\n",packet.seqnum);
+        packets_received++;
+        /* deliver to receiving application */
+        tolayer5(B, packet.payload);
+        /* send an ACK for the received packet */
+        sendpkt.acknum = expectedseqnum;
+        /* update state variables */
+        expectedseqnum = (expectedseqnum + 1) % SEQSPACE;
+    } else{
+        if (TRACE > 0)
+            printf("----B: packet %d is received, wrong order.\n",packet.seqnum);
+        //packets_received++;?
+        
+    }
 } else{
     /* packet is corrupted or out of order resend last ACK */
     if (TRACE > 0)
@@ -208,10 +219,12 @@ tolayer3 (B, sendpkt);
 }
 /* the following routine will be called once (only) before any other */
 /* entity B routines are called. You can use it to do any initialization */
-void B_init(void)
-{
+void B_init(void){
 expectedseqnum = 0;
 B_nextseqnum = 1;
+for(i = 0; i < 12; i++){
+    packet_received[i] = false;
+}
 }
 /******************************************************************************
 * The following functions need be completed only for bi-directional messages *
