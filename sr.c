@@ -193,18 +193,24 @@ if (!IsCorrupted(packet)){
     } else{
         if (TRACE > 0)
             printf("----B: packet %d is received, wrong order.\n",packet.seqnum);
-        //packets_received++;?
-        
+        packets_received++;
+        packet_received[packet.seqnum] = true;
+        out_of_order_buffer[packet.seqnum] = packet;
+
+        sendpkt.acknum = seqnum;
+
+        while(packet_received[expectedseqnum]){
+            tolayer5(B, out_of_order_buffer[expectedseqnum].payload);
+            packet_received[expectedseqnum] = false;
+            expectedseqnum = (expectedseqnum + 1) % SEQSPACE;
+        }
     }
 } else{
     /* packet is corrupted or out of order resend last ACK */
     if (TRACE > 0)
-        printf("----B: packet corrupted or not expected sequence number, resend ACK!\
+        printf("----B: packet corrupted, resend ACK!\
         n");
-    if (expectedseqnum == 0)
-        sendpkt.acknum = SEQSPACE - 1;
-    else
-        sendpkt.acknum = expectedseqnum - 1;
+    sendpkt.acknum = ((expectedseqnum - 1) % SEQSPACE);
 }
 /* create packet */
 sendpkt.seqnum = B_nextseqnum;
