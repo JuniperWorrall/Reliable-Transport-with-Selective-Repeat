@@ -69,7 +69,7 @@ int i;
 /* if not blocked waiting on ACK */
 if(windowcount < WINDOWSIZE){
     if(TRACE > 1)
-        printf("----A: New message arrives, send window is not full, send new message to layer3!\n");
+        printf("----A: New message arrives, send window is not full, send new messge to layer3!\n");
     /* create packet */
     sendpkt.seqnum = A_nextseqnum;
     sendpkt.acknum = NOTINUSE;
@@ -110,7 +110,7 @@ void A_input(struct pkt packet){
 /* if received ACK is not corrupted */
 if(!IsCorrupted(packet)){
     if(TRACE > 0)
-        printf("----A: uncorrupted ACK %d is received\n", packet.acknum);
+        printf("----A: uncorrupted ACK %d is received\n",packet.acknum);
     total_ACKs_received++;
 
     /* check if new ACK or duplicate */
@@ -225,6 +225,9 @@ if(!IsCorrupted(packet)){
                 expectedseqnum = (expectedseqnum + 1) % SEQSPACE;
             }
         } else if(!packet_received[packet.seqnum]){
+            if (TRACE > 0)
+                printf("----B: packet corrupted or not expected sequence number, resend ACK!\n");
+
             if(TRACE > 4)
                 printf("----B: packet %d is received, wrong order.\n",packet.seqnum);
             packets_received++;
@@ -240,6 +243,9 @@ if(!IsCorrupted(packet)){
         }
     }
 } else{
+    if (TRACE > 0)
+      printf("----B: packet corrupted or not expected sequence number, resend ACK!\n");
+
     /* packet is corrupted resend last ACK */
     if(TRACE > 4)
         printf("----B: packet %d corrupted, resend ACK!\n", packet.seqnum);
