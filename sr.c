@@ -195,7 +195,8 @@ if(!IsCorrupted(packet)){
     int window_start = expectedseqnum;
     int window_end = (expectedseqnum + WINDOWSIZE - 1) % SEQSPACE;
     bool in_window = false;
-
+    packets_received++;
+    
     if(window_start <= window_end){
         if(packet.seqnum >= window_start && packet.seqnum <= window_end){
             in_window = true;
@@ -210,7 +211,7 @@ if(!IsCorrupted(packet)){
         if(packet.seqnum == expectedseqnum){
             if(TRACE > 0)
                 printf("----B: packet %d is correctly received, send ACK!\n",packet.seqnum);
-            packets_received++;
+
             /* deliver to receiving application */
             tolayer5(B, packet.payload);
 
