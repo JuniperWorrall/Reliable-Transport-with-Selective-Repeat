@@ -226,9 +226,6 @@ if(!IsCorrupted(packet)){
                 expectedseqnum = (expectedseqnum + 1) % SEQSPACE;
             }
         } else if(!packet_received[packet.seqnum]){
-            if (TRACE > 0)
-                printf("----B: packet corrupted or not expected sequence number, resend ACK!\n");
-
             if(TRACE > 4)
                 printf("----B: packet %d is received, wrong order.\n",packet.seqnum);
             packets_received++;
@@ -244,13 +241,10 @@ if(!IsCorrupted(packet)){
         }
     }
 } else{
-    if (TRACE > 0)
-      printf("----B: packet corrupted or not expected sequence number, resend ACK!\n");
-
     /* packet is corrupted resend last ACK */
     if(TRACE > 4)
         printf("----B: packet %d corrupted, resend ACK!\n", packet.seqnum);
-    sendpkt.acknum = (expectedseqnum + SEQSPACE - 1) % SEQSPACE;
+    /*sendpkt.acknum = (expectedseqnum + SEQSPACE - 1) % SEQSPACE;*/
 }
 
 sendpkt.seqnum = 0;
