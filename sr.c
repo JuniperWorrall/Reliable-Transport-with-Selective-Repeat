@@ -137,11 +137,18 @@ if(!IsCorrupted(packet)){
                 } while(PastAcked[windowfirst] == true);
             }
 
-            /* Stop timer if there are no more unacked packets in window */
-            
-            if (windowcount == 0)
+            /* start timer again if there are still more unacked packets in window */
+            if(windowcount == 0){
                 stoptimer(A);
-
+                waiting_for_ack = false;
+            } else if(windowcount > 1){
+                stoptimer(A);
+                starttimer(A, RTT);
+                waiting_for_ack = true;
+            } else if(waiting_for_ack == false){
+                starttimer(A, RTT);
+                waiting_for_ack = true;
+            }
         }
     } else if(TRACE > 0)
         printf ("----A: duplicate ACK received, do nothing!\n");
@@ -228,7 +235,6 @@ if(!IsCorrupted(packet)){
         } else if(!packet_received[packet.seqnum]){
             if(TRACE > 4)
                 printf("----B: packet %d is received, wrong order.\n",packet.seqnum);
-            packets_received++;
             packet_received[packet.seqnum] = true;
             out_of_order_buffer[packet.seqnum] = packet;
         }
