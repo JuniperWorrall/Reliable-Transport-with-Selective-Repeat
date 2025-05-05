@@ -128,6 +128,9 @@ if(!IsCorrupted(packet)){
             /* cumulative acknowledgement - determine how many packets are ACKed */
             if(packet.acknum > seqfirst){
                 PastAcked[packet.acknum % WINDOWSIZE] = true;
+                stoptimer(A);
+                starttimer(A, RTT);
+                waiting_for_ack = true;
             } else{
                 /* slide window by the number of packets ACKed */
                 do {
