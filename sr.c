@@ -151,6 +151,10 @@ if(!IsCorrupted(packet)){
             } else if(waiting_for_ack == false){
                 starttimer(A, RTT);
                 waiting_for_ack = true;
+            } else{
+                stoptimer(A);
+                starttimer(A, RTT);
+                waiting_for_ack = true;
             }
         }
     } else if(TRACE > 0)
