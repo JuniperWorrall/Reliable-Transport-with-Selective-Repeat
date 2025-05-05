@@ -137,10 +137,10 @@ if(!IsCorrupted(packet)){
                 } while(PastAcked[windowfirst] == true);
             }
 
-            /* start timer again if there are still more unacked packets in window */
-            stoptimer(A);
-            if (windowcount > 0)
-                starttimer(A, RTT);
+            /* Stop timer if there are no more unacked packets in window */
+            
+            if (windowcount == 0)
+                stoptimer(A);
 
         }
     } else if(TRACE > 0)
