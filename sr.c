@@ -245,6 +245,7 @@ if(!IsCorrupted(packet)){
     if(TRACE > 4)
         printf("----B: packet %d corrupted, resend ACK!\n", packet.seqnum);
     /*sendpkt.acknum = (expectedseqnum + SEQSPACE - 1) % SEQSPACE;*/
+    return;
 }
 
 sendpkt.seqnum = 0;
